@@ -387,6 +387,11 @@ select count(*), avg(salario), year(fecha_alt) as ano from trabajadores group by
 -- 4.9.1.16 Departamento(s) con mayor número de trabajadores que sean EMPLEADO y su nº de trabajadores.
 select dept_no, count(*) from trabajadores where oficio = "empleado" group by dept_no order by count(*) desc limit 1;
 
+
+----------------------------------------------------------------
+-- 4.10 Having
+----------------------------------------------------------------
+
 -- 4.10.1.1 Muestra las sedes que tengan más de tres empleados trabajando para ellas.
 select sede_trabaja, count(*) from personas group by sede_trabaja;
 
@@ -405,16 +410,10 @@ select puesto, avg(salario) from personas group by puesto having avg(salario) be
 select year(fecha_alta), count(*) from personas where year(fecha_alta) > 1980 group by year(fecha_alta) having count(*) > 3;
 
 -- 4.10.1.6 Muestra aquellos cargos que tengan más de 1 empleado
-select puesto
+select cargo, count(*) from empleados group by cargo having count(*) > 1;
 
 -- 4.10.1.8 Seleccionar la extensiones telefónicas que estén asignadas a más de un empleado, indicando a cuántos empleados está asignado cada uno.
-
-
-
-
-----------------------------------------------------------------
--- 4.10 Having
-----------------------------------------------------------------
+select ext_telefono, count(*) from empleados group by ext_telefono having count(*) > 1;
 
 
 
