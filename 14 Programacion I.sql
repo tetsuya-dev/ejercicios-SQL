@@ -1,4 +1,53 @@
 -- --------------------------------------------------------------
+-- 14.1 Procedimientos sin parámetros
+-- --------------------------------------------------------------
+
+-- 14.1.1 Escribe un procedimiento denominado “holaMundo” que no tenga ningún parámetro de entrada ni de salida y que muestre el texto ¡Hola mundo!
+drop procedure if exists holaMundo;
+delimiter $$
+create procedure holaMundo()
+begin
+	select "¡Hola mundo!";
+end$$$
+delimiter ;
+
+call holaMundo();
+
+-- 14.1.2 Escribe un procedimiento denominado ‘muestraFecha’ que muestre la fecha actual con un mensaje de este tipo.
+-- Ejemplo:  "Hoy es día XX del mes de XXXXXX del año XXXX"
+drop procedure if exists muestraFecha;
+delimiter $$
+create procedure muestraFecha()
+begin
+    declare dia, anho int;
+    declare mes varchar(25);
+    declare mensaje longtext default "";
+    
+    set dia = day(curdate());
+    set anho = year(curdate());
+    set mes = monthname(curdate());
+    
+    set mensaje = concat("Hoy es día ", dia, " del mes de ", mes, " del año ", anho);
+    
+    select mensaje;
+end$$
+delimiter ;
+call muestraFecha();
+
+-- 14.1.3 Escribe un procedimiento denominado ‘listaEquipos’ que muestre la lista de equipos y el número de jugadores que hay en cada uno.
+drop procedure if exists listaEquipos;
+delimiter $$
+create procedure listaEquipos()
+begin
+	declare nombreEquipo varchar(30);
+    declare numJugadores int;
+    
+    set numJugadores = (select count(*) from jugadores group by equipo);
+    set nombreEquipo = (select equipo from jugadores);
+end$$
+delimiter ;
+
+-- --------------------------------------------------------------
 -- 14.3 Variables
 -- --------------------------------------------------------------
 
