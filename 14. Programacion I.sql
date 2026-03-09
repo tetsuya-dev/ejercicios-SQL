@@ -354,4 +354,348 @@ END$$
 
 DELIMITER ;
 
-call modificaSalario(110)
+call modificaSalario(110);
+
+
+
+
+
+-- --------------------------------------------------------------
+-- 14.7 Estructuras de control iterativas no anidadas
+-- --------------------------------------------------------------
+
+-- 14.7.1 Crea un procedimiento llamado “secuenciaNumeros” que, dado un número como parámetro, muestre todo el intervalo de números desde el 1 hasta el número de la siguiente manera:=
+--    Ejecución: CALL secuenciaNumeros (11);
+--    Respuesta por pantalla: ‘Los números del intervalo desde 1 hasta 11 son 1 2 3 4 5 6 7 8 9 10 11.’
+--    Ojo: Debe comprobar que el número es positivo.
+drop procedure if exists secuenciaNumeros;
+delimiter $$
+create procedure secuenciaNumeros(in n int)
+begin
+	declare num int;
+    declare t varchar(100);
+    set num = 1;
+    set t = "";
+	while (num <= n) do
+		set t = concat(t, num, " ");
+        set num = num + 1;
+    end while;
+    select t;
+end$$
+delimiter ;
+call secuenciaNumeros(11);
+
+
+-- 14.7.2 Crea un procedimiento llamado “secuenciaNumeros2” que, dado dos números como parámetro, muestre todo el intervalo de números desde el primer parámetro hasta el segundo parámetro de la siguiente manera:
+--     Ejecución: CALL secuenciaNumeros2 (3,9);
+--     Respuesta por pantalla: ‘Los números del intervalo desde 3 hasta 9 son 3 4 5 6 7 8 9’;
+--     Ojo: Debe comprobar que los números son positivos y el segundo mayor que el primero.
+drop procedure if exists secuenciaNumeros2;
+delimiter $$
+create procedure secuenciaNumeros2(in n int, in n2 int)
+begin
+	declare num int;
+    declare t varchar(100);
+    set t = "";
+	while (n <= n2) do
+		set t = concat(t, n, " ");
+        set n = n + 1;
+    end while;
+    select t;
+end$$
+delimiter ;
+call secuenciaNumeros2(4, 10);
+
+-- 14.7.3 Crea un procedimiento llamado “secuenciaNumeros3” que amplíe la funcionalidad del anterior ejercicio usando comas entre los números:
+--    Ejecución: CALL secuenciaNumeros3 (3,9)
+--    Respuesta por pantalla: ‘Los números del intervalo desde 3 hasta 9 son 3, 4, 5, 6, 7, 8, 9.’
+--    ¡Ojo que tras el último número no hay coma!
+--    Ojo: Debe comprobar que los números son positivos y el segundo mayor que el primero.
+drop procedure if exists secuenciaNumeros3;
+delimiter $$
+create procedure secuenciaNumeros3(in n int, in n2 int)
+begin
+	declare num int;
+    declare t varchar(100);
+    set t = "";
+	while (n <= n2) do
+		if (n = n2) then
+			set t = concat(t, n, ". ");
+		else
+			set t = concat(t, n, ", ");
+        end if;
+        set n = n + 1;
+    end while;
+    select t;
+end$$
+delimiter ;
+call secuenciaNumeros3(3, 11);
+
+-- 14.7.4 Crea un procedimiento llamado “tablaMultiplicar” que recibirá un número entero entre 1 y 9 para que haga lo siguiente:
+--     Borre si existe y después cree una tabla llamada TablaMul con 3 columnas de tipo número entero.
+-- 		CREATE TABLE TablaMul(
+-- 		numero INT,
+-- 		multiplicador INT,
+-- 		resultado INT);	
+-- a. En la primera el número recibido como parámetro.
+-- b. En la segunda cada número del 1 al 9 según la fila.
+-- c. En la tercera el resultado de multiplicar las columnas anteriores
+--     Inserta la tabla de multiplicar del número proporcionado en la tabla creada y después muéstrala por pantalla.
+drop procedure if exists tablaMultiplicar;
+delimiter $$
+create procedure tablaMultiplicar(in n int)
+begin
+	declare mul int;
+    set mul = 1;
+	
+	drop table if exists TablaMul;
+	CREATE TABLE TablaMul(
+		numero INT,
+		multiplicador INT,
+		resultado INT)
+        ;	
+	while (mul <= 9) do
+		insert into TablaMul (numero, multiplicador, resultado) values(n, mul, n * mul);
+		set mul = mul + 1;
+	end while;
+    select * from TablaMul;
+end$$
+delimiter ;
+call tablaMultiplicar(3);
+
+
+-- 14.7.6 Crear un procedimiento llamado “invertirCadena” que, dado un parámetro de cadena de caracteres, almacene en una variable esa cadena “al revés”, es decir, con el orden de sus caracteres invertido. 
+-- Después, muestra el valor de la variable (la cadena invertida).
+--    Ojo: Solo puedes usar las siguientes funciones: CONCAT(), SUBSTRING(cadena, posición, numCaracteres) y CHAR_LENGTH().
+drop procedure if exists invertirCadena;
+delimiter $$
+create procedure invertirCadena(in texto varchar(100))
+begin
+	declare invertido varchar(100);
+    declare c varchar(1);
+    declare n, largo int;
+    set invertido = "";
+    set c = "";
+    set n = 0;
+    set largo = char_length(texto);
+    while (n < largo) do
+		set c = substring(texto, largo - n, 1);
+        set invertido = concat(invertido, c);
+        set n = n + 1;
+    end while;
+    select invertido;
+end$$
+delimiter ;
+call invertirCadena("hola");
+
+
+-- 14.7.7 Crear un procedimiento llamado “creaVacaciones” que reciba como parámetro un año (tipo YEAR) y que inserte en una tabla todas las fechas de los fines de semana y del mes de agosto.
+--     El procedimiento borra la tabla si es que existe y crea la siguiente tabla:
+-- 	CREATE TABLE Vacaciones(
+-- 	Dia_Vac DATE UNIQUE NOT NULL)
+--     ;
+--     Vamos recorriendo todas las fechas del año proporcionado para incluir todas las que pertenezcan a fin de semana o a agosto.
+--     Para terminar: El procedimiento mostrará todas las fechas de la tabla incluyendo una columna con el nombre del día de la semana.
+--         Pista 1: Las fechas también se pueden construir como cadenas y se les puede aplicar CONCAT().
+--         Pista 2: La función DATE_ADD (fecha, INTERVAL numDias DAY) incrementa una fecha un número determinado de días y luego devuelve la fecha.
+drop procedure if exists creaVacaciones;
+delimiter $$
+create procedure creaVacaciones(in anio year)
+begin
+    declare fecha_actual date;
+    declare fecha_fin date;
+    
+    set fecha_actual = concat(anio, '-01-01');
+    set fecha_fin = concat(anio, '-12-31');
+
+    drop table if exists Vacaciones;
+    create table Vacaciones(
+        Dia_Vac date unique not null
+    );
+
+    while (fecha_actual <= fecha_fin) do
+        if (month(fecha_actual) = 8 OR dayofweek(fecha_actual) IN (1, 7)) then
+            insert ignore into Vacaciones (Dia_Vac) values (fecha_actual);
+        end if;
+        set fecha_actual = date_add(fecha_actual, interval 1 day);
+    end while;
+    select Dia_Vac, dayname(Dia_Vac) as Nombre_Dia 
+    from Vacaciones
+    order by Dia_Vac;
+
+end$$
+delimiter ;
+
+call creaVacaciones(2024);
+
+
+-- 14.7.8 Crear un procedimiento llamado “cuentaPalabras” que, dado un parámetro de cadena de caracteres, cuente el número de palabras que contiene.
+--     Una palabra está delimitada por un espacio, un inicio de cadena o un fin de cadena.
+--     Ojo: Solo puedes usar las siguientes funciones: CONCAT(), SUBSTRING(cadena, posición, numCaracteres) y CHAR_LENGTH().
+--         Pista: Para obtener el carácter número 5 de la cadena str tienes que ejecutar SUBSTRING(str , 5 , 1).
+--         Equivale a “dame un carácter en la posición 5 de la cadena str.
+drop procedure if exists cuentaPalabras;
+delimiter $$
+create procedure cuentaPalabras(in texto varchar(500))
+begin
+	declare contador, largo, n int;
+    declare c varchar(1);
+    set contador = 1;
+    set largo = char_length(texto);
+    set n = 0;
+    while (n < largo) do
+		set c = substring(texto, n, 1);
+        if (c like " ") then
+			set contador = contador + 1;
+        end if;
+        set n = n + 1;
+    end while;
+    select contador;
+end$$
+delimiter ;
+call cuentaPalabras("hola como estas amigo");
+
+
+-- --------------------------------------------------------------
+-- 14.8 Estructuras de control iterativas anidadas
+-- --------------------------------------------------------------
+
+-- 14.8.1 Crear un procedimiento llamado “numerosFactoriales” que, dado un parámetro ‘limite’, muestre el resultado de todos factoriales hasta el límite dado por el parámetro.
+--     Ejecución: CALL numerosFactoriales (7);
+--     Respuesta por pantalla:
+-- 1! = 1
+-- 2! = 2
+-- 3! = 6
+-- 4! = 24
+-- 5! = 120
+-- 6! = 720
+-- 7! = 5040
+drop procedure if exists numerosFactoriales;
+delimiter $$
+create procedure numerosFactoriales(in limite int)
+begin
+    declare n int default 1;
+    declare resultado bigint default 1; 
+    declare salida text default "";
+    while (n <= limite) do
+        set resultado = resultado * n;
+        set salida = concat(salida, n, "! = ", resultado, "\n");
+        set n = n + 1;
+    end while;
+
+    select salida ;
+end$$
+delimiter ;
+
+call numerosFactoriales(7);
+
+
+-- 14.8.2 Crear un procedimiento llamado “numerosPrimos” que, dado un parámetro ‘cantidad’, muestre n-primeros números primos.
+--     Ejecución: CALL numerosPrimos (20); Mostrará los 20 primeros números primos.
+--     Respuesta por pantalla:
+-- Los 20 primeros números primos son: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67 y 71.
+drop procedure if exists numerosPrimos;
+delimiter $$
+create procedure numerosPrimos(in limite int)
+begin
+    declare n int default 2;      
+    declare divisor int;
+    declare es_primo boolean;
+    declare resul varchar(500) default "";
+
+    while (n <= limite) do
+        set es_primo = true;
+        set divisor = 2;
+        
+        while (divisor <= n / 2) do
+            if (n % divisor = 0) then
+                set es_primo = false;
+            end if;
+            set divisor = divisor + 1;
+        end while;
+        if (es_primo) then
+            set resul = concat(resul, n, " ");
+        end if;
+        set n = n + 1;
+    end while;
+
+    select resul ;
+end$$
+delimiter ;
+
+call numerosPrimos(20);
+
+
+-- 14.8.3 Crear un procedimiento “creaRampa” Dado como parámetro un número que debe ser menor que 30 construye la siguiente estructura del ejemplo hasta el límite que marque el parámetro.
+--     Por ejemplo, para el parámetro 7 se mostrará por pantalla.
+-- 1
+-- 22
+-- 333
+-- 4444
+-- 55555
+-- 666666
+-- 7777777
+--     Recuerda que para hacer un salto de línea se debe usar el “\n”.
+drop procedure if exists creaRampa;
+delimiter $$
+create procedure creaRampa(in limite int)
+begin
+    declare i int default 1;
+    declare rampa text default "";
+    if (limite < 30) then
+        while (i <= limite) do
+            set rampa = concat(rampa, repeat(i, i), '\n');
+            set i = i + 1;
+        end while;
+        select rampa;
+    else
+        select "Error: El número debe ser menor a 30";
+    end if;
+end$$
+delimiter ;
+
+call creaRampa(7);
+
+
+-- 14.8.4 Crear un procedimiento “creaFlecha” Dado como parámetro un número que debe ser menor que 30 construye la siguiente estructura del ejemplo hasta el límite que marque el parámetro.
+--     Por ejemplo, para el parámetro 7 se mostrará por pantalla.
+-- 1
+-- 22
+-- 333
+-- 4444
+-- 55555
+-- 666666
+-- 7777777
+-- 666666
+-- 55555
+-- 4444
+-- 333
+-- 22
+-- 1
+--     Recuerda que para hacer un salto de línea se debe usar el “\n”.
+
+drop procedure if exists creaFlecha;
+delimiter $$
+create procedure creaFlecha(in limite int)
+begin
+    declare i int;
+    declare flecha text default '';
+    if (limite < 30) then
+        set i = 1;
+        while (i <= limite) do
+            set flecha = concat(flecha, repeat(i, i), '\n');
+            set i = i + 1;
+        end while;
+        set i = limite - 1;
+        while (i >= 1) do
+            set flecha = concat(flecha, repeat(i, i), '\n');
+            set i = i - 1;
+        end while;
+        select flecha;
+    else
+        select "Error: El número debe ser menor a 30" ;
+    end if;
+end$$
+delimiter ;
+
+call creaFlecha(7);
