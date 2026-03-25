@@ -40,3 +40,44 @@ end$$
 delimiter ;
 
 select pr_insertar_alumno(1, "Pedro", "Sanchez", "Castejon");
+
+
+-- 15.1.2 Realiza un procedimiento llamado “pr_borra_tabla” que intente eliminar la tabla pruebaUniversidad (esta tabla no existe).
+--     Esto debe provocar un error 1051 o SQLSTATE '42S02' que debemos tratar saliendo del procedimiento y mostrando el siguiente mensaje:
+-- "Has intentado eliminar una tabla que no existe y yo NOMBRE_ALUMNO APELLIDO_ALUMNO he evitado que lo hicieras."
+--     Sustituye NOMBRE_ALUMNO APELLIDO_ALUMNO por tu nombre.
+--     Si la tabla existiera debería eliminarla y, después, mostrar un mensaje en el que se indique lo siguiente: "Tabla eliminada con éxito"
+
+drop procedure if exists pr_borra_tabla;
+delimiter $$
+create procedure pr_borra_tabla()
+begin
+    declare exit handler for 1051 
+		begin 
+			select 'Has intentado eliminar una tabla que no existe y yo Raul Sanchez he evitado que lo hicieras.' as Mensaje;
+		end;
+
+    drop table pruebaUniversidad;
+
+    select 'Tabla eliminada con éxito' as Mensaje;
+end$$
+delimiter ;
+
+call pr_borra_tabla();
+
+
+-- 15.1.3 Realiza un procedimiento llamado “pr_inserta_profesor” que permita añadir un nuevo profesor en la tabla profesor. Para ello, hay que incluir su identificador de profesor 
+--     y su identificador de departamento.
+--     Si el profesor que se intentara insertar en la tabla ya estuviera en dicha tabla, debe generarse un error 1062 o SQLSTATE 'S1009' o '23000' 
+--     que debe tratarse saliendo del procedimiento y mostrando el siguiente mensaje: "Has intentado insertar un profesor cuyo número ya existe"
+--     Si el número de departamento pasado como parámetro no existiera, debería generarse un error 1452 o SQLSTATE '23000' que deba tratarse saliendo del procedimiento
+--     y mostrando el siguiente mensaje: "La clave ajena que has probado no existe en la tabla departamentos"
+--     Si la inserción es correcta, debe realizarse y, después, mostrarse el siguiente mensaje: "Inserción realizada con éxito".
+
+drop procedure if exists pr_inserta_profesor;
+delimiter $$
+create procedure pr_inserta_profesor(id_profe int, id_depart int) -- SIN TERMINAR
+begin
+	insert into profesor values(id_profe, id_depart);
+end$$
+delimiter ;
