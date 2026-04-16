@@ -295,3 +295,56 @@ end$$
 delimiter ;
 
 call datosprofesores3();
+
+
+-- --------------------------------------------------------------
+-- 15.3 Triggers
+-- --------------------------------------------------------------
+
+-- 15.3.1 Crea un trigger llamado “tr_artista_insert” que si se intenta dar de alta un nuevo artista y se envía un nif_jefe que no exista, se cambie su valor por null.
+
+drop trigger if exists tr_artista_insert;
+delimiter $$
+create trigger tr_artista_insert before insert on artistas for each row
+begin
+	if new.nif_jefe is not null then
+		if not exists (select 1 from artistas where nif = new.nif_jefe) then
+			set new.nif_jefe = null;
+		end if;
+	end if;
+end$$
+delimiter ;
+
+
+-- 15.3.2 Crea unos triggers llamados “tr_ganacias_atracciones_insert”, “tr_ganacias_atracciones_update” y “tr_ganacias_atracciones_delete” que comprueben que se cumplen las siguientes restricciones:
+--     El campo ganancias de la tabla ATRACCIONES se actualice cuando se añadan, borren o modifiquen datos en la tabla ATRACCION_DIA.
+--     Si al añadir una celebración nueva (ATRACCION_DIA) la fecha_inicio en ATRACCIONES es NULL, haremos que se inserte con la fecha actual.
+--     Nota: Debéis de tener en cuenta que tanto la fecha como las ganancias en ATRACCIONES pueden tener valores nulos. Dad un valor a esas columnas cuando sean null 
+--     (recordar que si operamos matemáticamente o concatenamos una columna con valor null siempre devolverá null).
+
+drop trigger if exists tr_ganacias_atracciones_insert;
+delimiter $$
+create trigger tr_ganacias_atracciones_insert before insert on atraccion_dia for each row
+begin
+	if new.fecha_inicio = null then
+		set new.fecha_inicio = current_date();
+    end if;
+end$$
+delimiter ;
+
+drop trigger if exists tr_ganacias_atracciones_update;
+delimiter $$
+create trigger tr_ganacias_atracciones_update before update on atraccion_dia for each row
+begin
+	
+end$$
+delimiter ;
+
+drop trigger if exists tr_ganacias_atracciones_delete;
+delimiter $$
+create trigger tr_ganacias_atracciones_delete before delete on atraccion_dia for each row
+begin
+	
+end$$
+delimiter ;
+select * from atraccion_dia;
